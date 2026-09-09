@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from telethon import TelegramClient, events
 
 from config import PROMOTION_GROUP_IDS
-from services.ps5_detector import is_ps5_message
+from services.offer_classifier import classify_offer
 
 load_dotenv()
 
@@ -19,14 +19,16 @@ client = TelegramClient(
 
 @client.on(events.NewMessage(chats=PROMOTION_GROUP_IDS))
 async def handle_new_message(event):
-    message = event.message.text or ""
+    message_text = event.message.text or ""
+    category = classify_offer(message_text)
 
-    if not is_ps5_message(message):
+    if category is None:
         return
 
     print("\n" + "=" * 50)
     print(f"Grupo: {event.chat.title}")
-    print(f"Mensagem: {message.text}")
+    print(f"Categoria: {category.value}")
+    print(f"Mensagem: {message_text}")
     print("=" * 50)
 
 async def main():
